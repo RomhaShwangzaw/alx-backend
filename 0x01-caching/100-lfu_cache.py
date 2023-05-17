@@ -10,63 +10,43 @@ class LFUCache(BaseCaching):
     """LFU Cache Class"""
 
     def __init__(self):
-        """Initializer"""
+        '''Initialize class instance'''
         super().__init__()
-        self.num_items = 0
-        self.cache_recency = {}
-        self.cache_frequency = {}
-        self.counter = 0
+        self.keys = []
+        self.uses = {}
 
     def put(self, key, item):
-        """
-        Assigns to the dictionary self.cache_data
-        the item `value` for the key `key`.
-        If the number of items in self.cache_data
-        is higher than BaseCaching.MAX_ITEMS:
-            * it discards the least frequently used item (LFU algorithm)
-            * if it finds more than 1 item to discard, it uses the LRU
-              algorithm to discard only the least recently used
-            * it prints DISCARD: with the key discarded followed by a new line
-        """
-        if key is None or item is None:
-            return
-
-        if key not in self.cache_data.keys():
-            self.num_items += 1
-
-        if self.num_items > BaseCaching.MAX_ITEMS:
-            sorted_cache_frequency = sorted(self.cache_frequency.items(),
-                                            key=lambda x: x[1])
-            freq_iterator = iter(sorted_cache_frequency)
-            lfu_key, lfu_value = next(freq_iterator)
-            next_key, next_value = next(freq_iterator)
-            while next_value == lfu_value:
-                if self.cache_recency[next_key] < self.cache_recency[lfu_key]:
-                    lfu_key, lfu_value = next_key, next_value
-                next_key, next_value = next(freq_iterator)
-            del self.cache_recency[lfu_key]
-            del self.cache_frequency[lfu_key]
-            del self.cache_data[lfu_key]
-            print("DISCARD: {}".format(lfu_key))
-            self.num_items -= 1
-
-        self.cache_data[key] = item
-        self.cache_recency[key] = self.counter
-        self.counter += 1
-        if key in self.cache_frequency.keys():
-            self.cache_frequency[key] += 1
-        else:
-            self.cache_frequency[key] = 1
+        '''Adds key/value pair to cache data'''
+        if key is not None and item is not None:
+            if (len(self.keys) == BaseCaching.MAX_ITEMS and
+                    key not in self.keys):
+                discard = self.keys.pop(self.keys.index(self.findLFU()))
+                del self.cache_data[discard]
+                del self.uses[discard]
+                print('DISCARD: {:s}'.format(discard))
+            self.cache_data[key] = item
+            if key not in self.keys:
+                self.keys.append(key)
+                self.uses[key] = 0
+            else:
+                self.keys.append(self.keys.pop(self.keys.index(key)))
+                self.uses[key] += 1
 
     def get(self, key):
-        """
-        Returns the value in self.cache_data linked to `key`.
-        """
-        if key in self.cache_recency.keys():
-            self.cache_recency[key] = self.counter
-            self.counter += 1
+        '''Return value stored in key of value in cache'''
+        if key is not None and key in self.cache_data:
+            self.keys.append(self.keys.pop(self.keys.index(key)))
+            self.uses[key] += 1
+            return self.cache_data[key]
+        return None
 
-        if key in self.cache_frequency.keys():
-            self.cache_frequency[key] += 1
+    def findLFU(self):
+        '''Return key of least frequently used item in cache'''
+        items = list(self.uses.items())
+        freq = [item[1] for item in items]
+        least = min(freq)
 
-        return self.cache_data.get(key)
+        lfu = [item[0] for item in items if item[1] == least]
+        for key in self.keys:
+            if key in lfu:
+                return key
