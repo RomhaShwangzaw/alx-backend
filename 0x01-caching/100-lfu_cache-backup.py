@@ -37,13 +37,20 @@ class LFUCache(BaseCaching):
         if self.num_items > BaseCaching.MAX_ITEMS:
             sorted_cache_frequency = sorted(self.cache_frequency.items(),
                                             key=lambda x: x[1])
-            freq_iterator = iter(sorted_cache_frequency)
-            lfu_key, lfu_value = next(freq_iterator)
-            next_key, next_value = next(freq_iterator)
+            i = 0
+            lfu_key, lfu_value = sorted_cache_frequency[i]
+            next_value = -1
+            i += 1
+            if i < len(sorted_cache_frequency):
+                next_key, next_value = sorted_cache_frequency[i]
             while next_value == lfu_value:
                 if self.cache_recency[next_key] < self.cache_recency[lfu_key]:
                     lfu_key, lfu_value = next_key, next_value
-                next_key, next_value = next(freq_iterator)
+                i += 1
+                if i < len(sorted_cache_frequency):
+                    next_key, next_value = sorted_cache_frequency[i]
+                else:
+                    break
             del self.cache_recency[lfu_key]
             del self.cache_frequency[lfu_key]
             del self.cache_data[lfu_key]
