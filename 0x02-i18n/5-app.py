@@ -33,7 +33,6 @@ def index() -> str:
     return render_template('4-index.html')
 
 
-# A mocked database user table
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
     2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
@@ -52,7 +51,7 @@ def get_user() -> Optional[Dict]:
     login_as = request.args.get('login_as')
     if not login_as:
         return None
-    return users.get(login_as)
+    return users.get(int(login_as))
 
 
 @app.before_request
