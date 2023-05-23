@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Flask app"""
+"""A Basic Flask app"""
 
 from flask import Flask, render_template
 
@@ -7,7 +7,8 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def index():
+def index() -> str:
+    """The home/index page"""
     return render_template('index.html')
 
 
