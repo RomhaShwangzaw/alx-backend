@@ -30,7 +30,7 @@ def get_locale() -> str:
 @app.route('/')
 def index() -> str:
     """The home/index page"""
-    return render_template('4-index.html')
+    return render_template('5-index.html')
 
 
 users = {
