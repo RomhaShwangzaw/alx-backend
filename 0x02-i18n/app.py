@@ -2,7 +2,7 @@
 """A Basic Flask app"""
 
 from flask import Flask, render_template, request, g
-from flask_babel import Babel
+from flask_babel import Babel, format_datetime
 from typing import Optional, Dict
 from pytz import timezone
 import pytz
@@ -47,6 +47,7 @@ def before_request() -> None:
     it as a global on `flask.g.user`.
     """
     g.user = get_user()
+    g.current_time = format_datetime()
 
 
 @babel.localeselector
@@ -78,7 +79,7 @@ def get_timezone() -> str:
 @app.route('/')
 def index() -> str:
     """The home/index page"""
-    return render_template('7-index.html')
+    return render_template('index.html')
 
 
 if __name__ == "__main__":
