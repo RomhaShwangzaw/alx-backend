@@ -13,7 +13,8 @@ let reservationEnabled = false;
 const reserveSeat = (number) => client.SET('available_seats', number);
 
 const getCurrentAvailableSeats = async () => {
-  return promisify(client.GET).bind(client)('available_seats');
+  const seats = await promisify(client.GET).bind(client)('available_seats');
+  return seats;
 };
 
 app.get('/available_seats', (_, res) => {

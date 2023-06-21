@@ -32,7 +32,8 @@ const client = createClient();
 const reserveStockById = (itemId, stock) => client.SET(`item.${itemId}`, stock);
 
 const getCurrentReservedStockById = async (itemId) => {
-  return promisify(client.GET).bind(client)(`item.${itemId}`);
+  const stock = await promisify(client.GET).bind(client)(`item.${itemId}`);
+  return stock;
 };
 
 app.get('/list_products', (_, res) => {
