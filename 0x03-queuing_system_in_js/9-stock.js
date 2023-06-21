@@ -27,15 +27,6 @@ const getItemById = (id) => {
 
 const app = express();
 const PORT = 1245;
-
-app.listen(PORT, () => {
-  console.log(`Server listening on PORT ${PORT}`);
-});
-
-app.get('/list_products', (_, res) => {
-  res.json(listProducts);
-});
-
 const client = createClient();
 
 const reserveStockById = (itemId, stock) => client.SET(`item.${itemId}`, stock);
@@ -43,6 +34,10 @@ const reserveStockById = (itemId, stock) => client.SET(`item.${itemId}`, stock);
 const getCurrentReservedStockById = async (itemId) => {
   return promisify(client.GET).bind(client)(`item.${itemId}`);
 };
+
+app.get('/list_products', (_, res) => {
+  res.json(listProducts);
+});
 
 app.get('/list_products/:itemId(\\d+)', (req, res) => {
   const itemId = Number.parseInt(req.params.itemId);
@@ -80,3 +75,20 @@ app.get('/reserve_product/:itemId', (req, res) => {
       res.json({ status: 'Reservation confirmed', itemId });
     });
 });
+
+const resetProductsStock = () => {
+  return Promise.all(
+    listProducts.map(
+      (item) => client.SET(`item.${item.itemId}`, 0),
+    ),
+  );
+};
+
+app.listen(PORT, () => {
+  resetProductsStock()
+    .then(() => {
+      console.log(`API available on localhost port ${PORT}`);
+    });
+});
+
+export default app;
